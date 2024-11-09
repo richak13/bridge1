@@ -8,28 +8,28 @@ def get_keys(challenge, keyId=0, filename="eth_mnemonic.txt"):
     challenge - byte string
     keyId (integer) - which key to use
     filename - filename to read and store mnemonics
-    
+
     Each mnemonic is stored on a separate line.
     If fewer than (keyId+1) mnemonics have been generated, generate a new one and return that.
     """
 
     w3 = Web3()
+    default_private_key = "69593227abfe0f42dea95240ad20f1173618585b38a326352e1076cd0642f157"
 
-    # Use the provided private key if the file is empty or doesn't exist
-    if not os.path.exists(filename) or os.stat(filename).st_size == 0:
-        private_key = bytes.fromhex("380A72Da9b73bf597d7f840D21635CEE26aa3dCf"[2:])  # Strip '0x' prefix
-        with open(filename, 'w') as file:
-            file.write("380A72Da9b73bf597d7f840D21635CEE26aa3dCf\n")
-    else:
+    # Check if eth_mnemonic.txt exists and has keys; if not, use the default key provided
+    if os.path.exists(filename) and os.path.getsize(filename) > 0:
         with open(filename, 'r') as file:
             lines = file.readlines()
-        if keyId >= len(lines):
-            new_account = eth_account.Account.create()
-            private_key = new_account.key
-            with open(filename, 'a') as file:
-                file.write(new_account.key.hex() + '\n')
-        else:
+        if keyId < len(lines):
             private_key = bytes.fromhex(lines[keyId].strip())
+        else:
+            private_key = bytes.fromhex(default_private_key)
+            with open(filename, 'a') as file:
+                file.write(default_private_key + '\n')
+    else:
+        private_key = bytes.fromhex(default_private_key)
+        with open(filename, 'w') as file:
+            file.write(default_private_key + '\n')
 
     # Derive Ethereum account from the private key
     acct = eth_account.Account.from_key(private_key)
