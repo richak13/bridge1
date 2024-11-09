@@ -51,8 +51,8 @@ def get_keys(challenge, keyId=0, filename="eth_mnemonic.txt"):
     assert eth_account.Account.recover_message(msg, signature=sig.signature) == eth_addr, \
         "Failed to sign message properly"
 
-    # Return the signature and address
-    return sig.signature.hex(), eth_addr
+    # Return the signature object and address
+    return sig, eth_addr
 
 if __name__ == "__main__":
     for i in range(4):
