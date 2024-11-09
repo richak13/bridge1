@@ -20,20 +20,21 @@ def get_keys(challenge, keyId=0, filename="eth_mnemonic.txt"):
     if len(default_private_key) != 64:
         raise ValueError("Provided private key is not 32 bytes (64 hex characters).")
 
-    # Check if eth_mnemonic.txt exists and has keys; if not, use the default key provide
-    if os.path.exists(filename) and os.path.getsize(filename) > 0:
+    # Check if eth_mnemonic.txt exists and has keys; if not, use the default key provided
+    if os.path.exists(filename):
         with open(filename, 'r') as file:
             lines = file.readlines()
-        if keyId < len(lines):
+        if keyId < len(lines) and len(lines[keyId].strip()) == 64:
+            # Valid key found in file
             private_key_hex = lines[keyId].strip()
-            if len(private_key_hex) != 64:  # Verify correct length
-                raise ValueError("Stored private key is not 32 bytes (64 hex characters).")
             private_key = bytes.fromhex(private_key_hex)
         else:
+            # Key is missing or invalid, use default and write it to the file
             private_key = bytes.fromhex(default_private_key)
-            with open(filename, 'a') as file:
+            with open(filename, 'w') as file:
                 file.write(default_private_key + '\n')
     else:
+        # File does not exist, create it with the default key
         private_key = bytes.fromhex(default_private_key)
         with open(filename, 'w') as file:
             file.write(default_private_key + '\n')
