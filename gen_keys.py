@@ -16,12 +16,19 @@ def get_keys(challenge, keyId=0, filename="eth_mnemonic.txt"):
     w3 = Web3()
     default_private_key = "69593227abfe0f42dea95240ad20f1173618585b38a326352e1076cd0642f157"
 
-    # Check if eth_mnemonic.txt exists and has keys; if not, use the default key provided
+    # Ensure the default private key is valid (32 bytes in hex format)
+    if len(default_private_key) != 64:
+        raise ValueError("Provided private key is not 32 bytes (64 hex characters).")
+
+    # Check if eth_mnemonic.txt exists and has keys; if not, use the default key provide
     if os.path.exists(filename) and os.path.getsize(filename) > 0:
         with open(filename, 'r') as file:
             lines = file.readlines()
         if keyId < len(lines):
-            private_key = bytes.fromhex(lines[keyId].strip())
+            private_key_hex = lines[keyId].strip()
+            if len(private_key_hex) != 64:  # Verify correct length
+                raise ValueError("Stored private key is not 32 bytes (64 hex characters).")
+            private_key = bytes.fromhex(private_key_hex)
         else:
             private_key = bytes.fromhex(default_private_key)
             with open(filename, 'a') as file:
